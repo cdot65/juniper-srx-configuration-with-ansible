@@ -12,7 +12,6 @@ configuration_snmp:
       categories:
         chassis: null
         link: null
-        chassis: null
         configuration: null
       targets:
         - name: 192.168.105.201
