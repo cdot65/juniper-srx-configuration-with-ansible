@@ -1,7 +1,7 @@
 ### ---------------------------------------------------------------------------
 ### APPLY BOOTSTRAP CONFIGURATION TO DEVICES
 ### ---------------------------------------------------------------------------
-- hosts: all
+- hosts: "{{ device_name }}"
   connection: local
   gather_facts: False
   become: False

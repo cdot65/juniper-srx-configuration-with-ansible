@@ -19,7 +19,7 @@
 ### ---------------------------------------------------------------------------
 ### REMOVE AND RECREATE BUILD DIRECTORIES
 ### ---------------------------------------------------------------------------
-- hosts: all
+- hosts: "{{ device_name }}"
   connection: local
   gather_facts: False
   roles:

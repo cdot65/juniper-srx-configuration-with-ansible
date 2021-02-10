@@ -21,17 +21,10 @@ system {
     }
 }
 interfaces {
-    em0 {
+    fxp0 {
         unit 0 {
             family inet {
                 address {{ ansible_host }}/24;
-            }
-        }
-    }
-    em1 {
-        unit 0 {
-            family inet {
-                address 169.254.0.2/24;
             }
         }
     }

@@ -2,7 +2,7 @@
 ### ---------------------------------------------------------------------------
 ### VALIDATE THAT ANSIBLE CONTROL MACHINE IS RUNNING A RECENT ANSIBLE VERSION
 ### ---------------------------------------------------------------------------
-- hosts: all
+- hosts: "{{ device_name }}"
   connection: local
   gather_facts: False
   become: False
