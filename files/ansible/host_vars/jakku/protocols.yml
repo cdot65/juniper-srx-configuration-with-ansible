@@ -1,0 +1,16 @@
+configuration_protocols:
+
+  lldp:
+    interface:
+      - name: all
+    port_description_type: interface-alias
+    port_id_subtype: interface-name
+
+  ospf:
+    area:
+      - name: "0.0.0.0"
+        interface:
+          - name: "ge-0/0/14.0"
+          - name: "ge-0/0/15.0"
+    export:
+      - POLICY_EXPORT_ROUTER_IPV4

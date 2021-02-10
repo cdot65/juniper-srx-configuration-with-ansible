@@ -1,0 +1,26 @@
+# ---
+# configuration_routing_instances:
+#   instance:
+
+#     # ### VRF VRF_1: vrf
+#     - name: VRF_1
+#       instance_type: "vrf"
+
+#       routing_options:
+#         router_id: "{{ device.lo1.ipv4 }}"
+#         auto_export: null
+
+#       ### INTERFACES
+#       interface:
+#         - name: "lo0.1"
+#         - name: "irb.100"
+#         - name: "irb.200"
+
+#       ### ROUTE DISTINGUISHERS
+#       route_distinguisher:
+#         rd_type: "{{ device.lo1.ipv4 }}:1"
+
+#       ### VRF configurations
+#       vrf_target:
+#         community: "target:10001:1"
+

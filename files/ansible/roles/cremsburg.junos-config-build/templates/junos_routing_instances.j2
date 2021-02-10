@@ -1,0 +1,238 @@
+#jinja2: lstrip_blocks: "True (or False)", trim_blocks: "True (or False)"
+{#- ---------------------------------------------------------------------------------- #}
+{# Junos Configuration stanza for "routing-options"                                    #}
+{# ---------------------------------------------------------------------------------- -#}
+{% if configuration_routing_instances is defined %}
+routing-instances {
+    {% if configuration_routing_instances.instance is defined %}
+    {% for each in configuration_routing_instances.instance %}
+    {{ each.name }} {
+        {# ----------------------------------------------------------------------------------- #}
+        {# bmp                                                                                 #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if each.bmp is defined %}
+        bmp {
+            {% if each.bmp.station is defined %}
+            {% for server in each.bmp.station %}
+            station {{ server.name }} {
+                initiation-message {{ inventory_hostname }};
+                local-address {{ server.local_address }};
+                {% if server.local_port is defined %}
+                local-port {{ server.local_port }};
+                {% endif %}
+                connection-mode {{ server.connection_mode }};
+                monitor {{ server.monitor }};
+                {% if server.routing_instance is defined %}
+                routing-instance {{ server.routing_instance }};
+                {% endif %}
+                {% if server.route_monitoring is defined %}
+                route-monitoring {
+                    {% if server.route_monitoring.pre_policy is defined %}
+                    pre-policy;
+                    {% endif %}
+                    {% if server.route_monitoring.post_policy is defined %}
+                    post-policy;
+                    {% endif %}
+                }
+                {% endif %}
+                station-address {{ server.station_address }};
+                station-port {{ server.station_port }};
+                statistics-timeout {{ server.statistics_timeout }};
+            }
+            {% endfor %}
+            {% endif %}
+        }
+        {% endif %}
+        {% if each.description is defined %}
+        description "{{ each.description }}";
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# protocols                                                                           #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.protocols is defined %}
+        protocols {
+        {% if each.protocols.evpn is defined %}
+            evpn {
+                encapsulation {{ each.protocols.evpn.encapsulation }};
+                {% if each.protocols.evpn.extended_vni_list is defined %}
+                {% if each.protocols.evpn.extended_vni_list|length > 1 %}
+                {% for item in each.protocols.evpn.extended_vni_list %}
+                extended-vni-list [ {{ item|join(' ') }} ];
+                {% endfor %}
+                {% else %}
+                {% for item in each.protocols.evpn.extended_vni_list %}
+                extended-vni-list {{ item }};
+                {% endfor %}
+                {% endif %}
+                {% endif %}
+                {% if each.protocols.evpn.default_gateway is defined %}
+                default-gateway {{ each.protocols.evpn.default_gateway }};
+                {% endif %}
+            }
+        {% endif %}
+        }
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# vlans                                                                               #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.vlans is defined %}
+        vlans {
+            {% for vlan in each.vlans %}
+            {{ vlan.name }} {
+                vlan-id {{ vlan.vlan_id }};
+                {% if vlan.l3_interface is defined %}
+                l3-interface {{ vlan.l3_interface }};
+                {% endif %}
+                {% if vlan.vxlan is defined %}
+                vxlan {
+                    vni {{ vlan.vxlan.vni }};
+                    {% if vlan.vxlan.ingress_node_replication is defined %}
+                    ingress-node-replication;
+                    {% endif %}
+                }
+                {% endif %}
+            }
+            {% endfor %}
+        }
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# vxlan vtep                                                                          #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.vtep_source_interface is defined %}
+        vtep-source-interface {{ each.vtep_source_interface.interface_name }};
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# vrf instance type                                                                   #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.instance_type is defined %}
+        instance-type {{ each.instance_type }};
+        {% endif %}
+        {% if each.access is defined %}
+        access {
+            {% if each.access.address_assignment is defined %}
+            address-assignment {
+                {% if each.access.address_assignment.pool is defined %}
+                {% for pool in each.access.address_assignment.pool %}
+                pool {{ pool.name }} {
+                    {% if pool.family.inet is defined %}
+                    family inet {
+                        network {{ pool.family.inet.network }};
+                        {% for item in pool.family.inet.range %}
+                        range {{ item.name }} {
+                            low {{ item.low }};
+                            high {{ item.high }};
+                        }
+                        {% endfor %}
+                        {% if pool.family.inet.dhcp_attributes is defined %}
+                        dhcp-attributes {
+                            {% if pool.family.inet.dhcp_attributes.router is defined %}
+                            router {
+                            {% for router in pool.family.inet.dhcp_attributes.router %}
+                                {{ router.name }};
+                            {% endfor %}
+                            }
+                            {% endif %}
+                            {% if pool.family.inet.dhcp_attributes.propagate_settings is defined %}
+                            propagate-settings {{ pool.family.inet.dhcp_attributes.propagate_settings }};
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                }
+                {% endfor %}
+                {% endif %}
+            }
+            {% endif %}
+        }
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# vrf interface                                                                       #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.interface is defined %}
+        {% if each.interface is not mapping and each.interface is not string %}
+        {% for each in each.interface %}
+        interface {{ each.name }};
+        {% endfor %}
+        {% else %}
+        interface {{ each.interface.name }};
+        {% endif %}
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# vrf route distinguisher                                                             #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.route_distinguisher.rd_type is defined %}
+        route-distinguisher {{ each.route_distinguisher.rd_type }};
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# vrf import / export                                                                 #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.vrf_import is defined %}
+        vrf-import {{ each.vrf_import }};
+        {% endif %}
+        {% if each.vrf_export is defined %}
+        vrf-export {{ each.vrf_export }};
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# vrf target                                                                          #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.vrf_target is defined %}
+        {% if each.vrf_target.auto is defined %}
+        vrf-target {
+            {{ each.vrf_target.community }};
+            auto;
+        }
+        {% else %}
+        vrf-target {{ each.vrf_target.community }};
+        {% endif %}
+        {% endif %}
+        {#- ---------------------------------------------------------------------------------- #}
+        {# vrf table label                                                             #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if each.vrf_table_label is defined %}
+        vrf-table-label;
+        {% endif %}
+        {% if each.routing_options is defined %}
+        routing-options {
+            {% if each.routing_options.static is defined %}
+            {% for each in each.routing_options.static.route %}
+            {% for route in each.next_hop %}
+            static route {{ each.name }} next-hop {{ route }};
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+            {% if each.routing_options.router_id is defined %}
+            router-id {{ each.routing_options.router_id }};
+            {% endif %}
+            {% if each.routing_options.multipath is defined %}
+            multipath;
+            {% endif %}
+            {% if each.routing_options.auto_export is defined %}
+            {% if each.routing_options.auto_export is mapping %}
+            auto-export {
+                {% if each.routing_options.auto_export.family.inet is defined %}
+                family inet {
+                    {% if each.routing_options.auto_export.family.inet.unicast is defined %}
+                    unicast;
+                    {% endif %}
+                }
+                {% endif %}
+            }
+            {% else %}
+            auto-export;
+            {% endif %}
+            {% endif %}
+            {% if each.routing_options.autonomous_system is defined %}
+            {% if each.routing_options.autonomous_system.loops is defined %}
+            autonomous-system {{ each.routing_options.autonomous_system.as_number }} loops {{ each.routing_options.autonomous_system.loops }};
+            {% else %}
+            autonomous-system {{ each.routing_options.autonomous_system.as_number }};
+            {% endif %}
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endfor %}
+    {% endif %}
+}
+{% endif %}

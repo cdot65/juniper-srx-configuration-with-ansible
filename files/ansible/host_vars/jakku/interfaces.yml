@@ -1,0 +1,101 @@
+configuration_interfaces:
+  interface:
+    # ### PHYSICAL INTERFACES
+    - name: ge-0/0/0
+      description: "internet interface"
+      unit:
+        name: "0"
+        family:
+          inet:
+            address:
+              name: "10.10.10.1/31"
+
+    - name: ge-0/0/1
+      flexible_vlan_tagging: null
+      unit:
+        - name: "10"
+          vlan_id: "10"
+          description: "Management vlan 10"
+          family:
+            inet:
+              address:
+                name: "192.168.10.1/24"
+
+        - name: "11"
+          vlan_id: "11"
+          description: "PC vlan 11"
+          family:
+            inet:
+              address:
+                name: "192.168.11.1/24"
+
+        - name: "12"
+          vlan_id: "12"
+          description: "Voice vlan 12"
+          family:
+            inet:
+              address:
+                name: "192.168.12.1/24"
+
+    - name: ge-0/0/2
+      flexible_vlan_tagging: null
+      unit:
+        - name: "90"
+          vlan_id: "90"
+          description: "DMZ LAN vlan 90"
+          family:
+            inet:
+              address:
+                name: "192.168.90.1/24"
+
+    - name: ge-0/0/14
+      unit:
+        - name: "0"
+          description: "Connection to Jakku"
+          family:
+            inet:
+              address:
+                name: "74.51.192.0/31"
+
+    - name: ge-0/0/15
+      unit:
+        - name: "0"
+          description: "Connection to Mustafar"
+          family:
+            inet:
+              address:
+                name: "216.227.240.0/31"
+
+    # ### MGMT INTERFACE
+    - name: fxp0
+      unit:
+        name: "0"
+        description: "out of band interface"
+        family:
+          inet:
+            address:
+              name: "192.168.105.2/24"
+              # arp:
+              #   - name: "10.6.5.1"
+              #     mac: "f4:a7:39:1b:d4:9b"
+
+    # ### LOOPBACK INTERFACES
+    - name: lo0
+      unit:
+        - name: "0"
+          description: loopback
+          family:
+            inet:
+              address:
+                name: "192.168.255.1/32"
+
+    # ### TUNNEL INTERFACES
+    - name: st0
+      unit:
+        - name: "1"
+          description: vpn_tunnel
+          family:
+            inet:
+              mtu: 1500
+              address:
+                name: "10.200.200.1/24"

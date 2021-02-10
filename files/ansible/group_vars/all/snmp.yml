@@ -1,0 +1,23 @@
+configuration_snmp:
+  community:
+    authorization: read-only
+    clients:
+      - name: 192.168.105.0/24
+      - name: 0.0.0.0/0
+        restrict: null
+    name: $home_snmp$
+  interface: fxp0.0
+  trap_group:
+    - name: space
+      categories:
+        chassis: null
+        link: null
+        chassis: null
+        configuration: null
+      targets:
+        - name: 192.168.105.201
+        - name: 192.168.105.202
+      version: v2
+  trap_options:
+    source_address:
+      address: "{{ ansible_host }}"

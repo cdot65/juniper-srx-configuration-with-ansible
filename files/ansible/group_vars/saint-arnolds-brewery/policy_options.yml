@@ -1,0 +1,61 @@
+configuration_policy_options:
+  policy_statement:
+    - name: LOOPBACK0
+      term:
+        - name: lo0_0
+          from:
+            protocol: 
+              - direct
+            route_filter:
+              - address: "{{ device.lo0.ipv4 }}"
+                exact: null
+          then:
+            accept: null
+
+    - name: POLICY_DEFAULT
+      term:
+        - name: WAN_DHCP
+          from:
+            protocol: 
+              - access-internal
+          then:
+            accept: null
+
+    - name: POLICY_EXPORT_ROUTER_IPV4
+      term:
+        - name: ALL_IPV4
+          from:
+            prefix_list: 
+              - PREFIX_ROUTER_IPV4
+          then:
+            accept: null
+
+    - name: ECMP
+      term:
+        - name: ECMP
+          then:
+            load_balance: 
+              per-packet: null
+
+  # community:
+  #   - name: COMMUNITY_GLOBAL
+  #     members: target:65100:1111
+
+  prefix_list:
+    - name: PREFIX_ALL
+      prefix_list_item:
+        - name: 0.0.0.0/0
+
+    - name: PREFIX_DEFAULT
+      prefix_list_item:
+        - name: 0.0.0.0/0
+
+    - name: PREFIX_ROUTER_IPV4
+      apply_path: "interfaces <*> unit <*> family inet address <*>"
+
+    - name: PREFIX_LOOPBACK_0_IPV4
+      apply_path: "interfaces lo0 unit 0 family inet address <*>"
+
+    - name: PREFIX_LOOPBACK_1_IPV4
+      apply_path: "interfaces lo0 unit 1 family inet address <*>"
+

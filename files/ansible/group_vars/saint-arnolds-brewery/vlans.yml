@@ -1,0 +1,25 @@
+configuration_vlans:
+  vlan:
+    - name: VNI_10000
+      description: "data network"
+      vlan_id: "100"
+      vxlan:
+        vni: 10000
+
+    - name: VNI_20000
+      description: "voice network"
+      vlan_id: "200"
+      vxlan:
+        vni: 20000
+
+    - name: VNI_30000
+      description: "guest network"
+      vlan_id: "300"
+      vxlan:
+        vni: 30000
+
+    - name: VNI_40000
+      description: "oob network"
+      vlan_id: "400"
+      vxlan:
+        vni: 40000

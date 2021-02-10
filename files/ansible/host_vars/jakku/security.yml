@@ -1,0 +1,303 @@
+---
+configuration_security:
+  log:
+    mode: stream
+    format: sd-syslog
+    report: null
+    source_address: 192.168.105.2
+    stream:
+      name: log-collector.dmz.home
+      severity: info
+      format: sd-syslog
+      host:
+        ipaddr: 192.168.105.203
+        port: 514
+  ike:
+    proposal:
+      - name: customer1-p1
+        authentication_method: pre-shared-keys
+        dh_group: group2
+        authentication_algorithm: sha1
+        encryption_algorithm: aes-128-cbc
+        lifetime_seconds: 28800
+    policy:
+      - name: customer1
+        mode: aggressive
+        proposals: customer1-p1
+        pre_shared_key:
+          ascii_text: "$9$dxVYoji.F6AevwgoZHkn/9pu1hSevMLIRlv8XVbjikmfQ/9t0Ic9ApOIRyroaZGjk3n9CpBs2H.f5/9O1RhKMWL7bsgLX"
+    gateway:
+      - name: 74_51_192_1_customer1
+        ike_policy: customer1
+        address: 74.51.192.1
+        dead_peer_detection:
+          optimized: null
+          interval: 10
+          threshold: 5
+        nat_keepalive: 5
+        local_identity:
+          hostname:
+            identity_hostname: hoth
+        external_interface: ge-0/0/0.0
+        version: v1-only
+  ipsec:
+    proposal:
+      - name: customer1-p2
+        protocol: esp
+        authentication_algorithm: hmac-sha-256-96
+        encryption_algorithm: aes-128-cbc
+        lifetime_seconds: 3600
+        lifetime_kilobytes: 256
+    policy:
+      - name: customer1
+        perfect_forward_secrecy:
+          keys: group2
+        proposals:
+          - customer1-p2
+    vpn:
+      - name: 74_51_192_1_customer1
+        bind_interface: st0.1
+        df_bit: clear
+        ike:
+          gateway: 74_51_192_1_customer1
+          idle_time: 60
+          no_anti_replay: null
+          ipsec_policy: customer1
+          install_interval: 1
+        establish_tunnels: immediately
+  address_book:
+    name: global
+    address:
+      - name: customer1
+        ip_prefix: 74.51.192.1/32
+    address_set:
+      - name: customers
+        address:
+          - name: customer1
+  forwarding_options:
+    family:
+      inet6:
+        mode: packet-based
+  screen:
+    ids_option:
+      name: untrust-screen
+      icmp:
+        ping_death: null
+      ip:
+        source_route_option: null
+        tear_drop: null
+      tcp:
+        syn_flood:
+          alarm_threshold: 1024
+          attack_threshold: 200
+          source_threshold: 1024
+          destination_threshold: 2048
+          timeout: 20
+        land: null
+  nat:
+    source:
+      rule_set:
+        - name: Zone_inside-Zone_internet
+          from:
+            zone:
+              - inside
+          to:
+            zone:
+              - internet
+          rule:
+            - name: inside-internet
+              src_nat_rule_match:
+                source_address:
+                  - 0.0.0.0/0
+                destination_address:
+                  - 0.0.0.0/0
+              then:
+                source_nat:
+                  interface: null
+        - name: Zone_dmz-Zone_internet
+          from:
+            zone:
+              - dmz
+          to:
+            zone:
+              - internet
+          rule:
+            - name: dmz-internet
+              src_nat_rule_match:
+                source_address:
+                  - 0.0.0.0/0
+                destination_address:
+                  - 0.0.0.0/0
+              then:
+                source_nat:
+                  interface: null
+    destination:
+      pool:
+        - name: dmz_django01-tls
+          description: ServiceNow to CSO Django web app
+          routing_instance:
+            default: null
+          address:
+            ipaddr: 192.168.201.21/32
+            port: 443
+      rule_set:
+        - name: Zone_internet
+          from:
+            zone:
+              - internet
+          rule:
+            - name: servicenow_django01
+              dest_nat_rule_match:
+                source_address:
+                  - 0.0.0.0/0
+                destination_address:
+                  dst_addr: 0.0.0.0/0
+                destination_port:
+                  - name: 9410
+              then:
+                destination_nat:
+                  pool:
+                    pool_name: dmz_django01-tls
+  forwarding_process:
+    enhanced_services_mode: null
+  policies:
+    policy:
+      - from_zone_name: inside
+        to_zone_name: internet
+        policy:
+          - name: inside_internet
+            match:
+              source_address: any
+              destination_address: any
+              application: any
+            then:
+              permit: null
+              log:
+                session_init: null
+                session_close: null
+      - from_zone_name: dmz
+        to_zone_name: internet
+        policy:
+          - name: inside_internet
+            match:
+              source_address: any
+              destination_address: any
+              application: any
+            then:
+              permit: null
+              log:
+                session_init: null
+                session_close: null
+      - from_zone_name: inside
+        to_zone_name: dmz
+        policy:
+          - name: inside_dmz
+            match:
+              source_address: any
+              destination_address: any
+              application: any
+            then:
+              permit: null
+              log:
+                session_init: null
+                session_close: null
+      - from_zone_name: inside
+        to_zone_name: junos-host
+        policy:
+          - name: inside_firewall
+            match:
+              source_address: any
+              destination_address: any
+              application: FIREWALL_MANAGEMENT
+            then:
+              permit: null
+              log:
+                session_init: null
+      - from_zone_name: internet
+        to_zone_name: dmz
+        policy:
+          - name: internet_dmz
+            match:
+              source_address: any
+              destination_address: any
+              application: any
+            then:
+              permit: null
+              log:
+                session_init: null
+                session_close: null
+      - from_zone_name: inside
+        to_zone_name: wan
+        policy:
+          - name: inside_wan
+            match:
+              source_address: any
+              destination_address: any
+              application: any
+            then:
+              permit: null
+              log:
+                session_init: null
+                session_close: null
+      - from_zone_name: dmz
+        to_zone_name: wan
+        policy:
+          - name: dmz_wan
+            match:
+              source_address: any
+              destination_address: any
+              application: any
+            then:
+              permit: null
+              log:
+                session_init: null
+                session_close: null
+  zones:
+    security_zone:
+      - name: inside
+        description: inside networks
+        host_inbound_traffic:
+          system_services:
+            - name: all
+          protocols:
+            - name: all
+        interfaces:
+          - name: ge-0/0/1.10
+      - name: internet
+        description: internet zone
+        screen: untrust-screen
+        host_inbound_traffic:
+          system_services:
+            - name: bootp
+            - name: dhcp
+            - name: ike
+            - name: netconf
+            - name: ssh
+        interfaces:
+          - name: ge-0/0/0.0
+          - name: lo0.0
+        application_tracking: null
+      - name: dmz
+        description: dmz networks
+        tcp_rst: null
+        screen: untrust-screen
+        host_inbound_traffic:
+          system_services:
+            - name: ping
+            - name: dhcp
+        interfaces:
+          - name: ge-0/0/2.90
+        application_tracking: null
+      - name: wan
+        description: wan networks
+        tcp_rst: null
+        screen: untrust-screen
+        host_inbound_traffic:
+          system_services:
+            - name: all
+          protocols:
+            - name: all
+        interfaces:
+          - name: ge-0/0/14.0
+          - name: ge-0/0/15.0
+        application_tracking: null

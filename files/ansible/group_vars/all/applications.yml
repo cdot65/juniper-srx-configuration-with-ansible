@@ -1,0 +1,7 @@
+configuration_applications:
+  application_set:
+    - name: FIREWALL_MANAGEMENT
+      application:
+        - name: junos-icmp-ping
+        - name: junos-ping
+        - name: junos-ssh
