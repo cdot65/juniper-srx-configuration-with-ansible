@@ -6,7 +6,7 @@ configuration_routing_options:
 
   forwarding_table:
     export: 
-      - "PFE_ECMP"
+      - "ECMP"
     ecmp_fast_reroute: 
       - null
 

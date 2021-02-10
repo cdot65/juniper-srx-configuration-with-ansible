@@ -1,0 +1,5 @@
+---
+- name: building configuration for stanza "applications"
+  template:
+    src: "junos_applications.j2"
+    dest: "{{ build_directory }}/125_applications.part.conf"

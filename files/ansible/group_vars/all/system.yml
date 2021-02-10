@@ -1,5 +1,9 @@
 configuration_system:
   host_name: "{{ inventory_hostname }}"
+
+  domain_name: "dmz.home"
+  domain_search: "dmz.home"
+
   login:
     user:
       # ### USERNAMES
